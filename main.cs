@@ -8,10 +8,16 @@ class Program
 {
     public static void Main(string[] args)
     {
-        var lines = ReadInput("Example.txt");
-        Console.WriteLine(lines.Count());
-    }
+        var boardReader = new BoardReader();
+        var (boardDict, instructions) = boardReader.Read("Example.txt");
 
-    static IEnumerable<string> ReadInput(string file) =>
-        File.ReadLines(file);
+        foreach (var instruction in instructions)
+            Console.WriteLine(instruction);
+    }
 }
+
+
+
+public record Tile(int X, int Y, bool Open, Tile Left, Tile Right, Tile Up, Tile Down);
+
+public record Instruction(int? Steps, bool? TurnRight);
