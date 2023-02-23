@@ -7,7 +7,7 @@ public class BoardReader
 {
     public (Dictionary<(int x, int y), Tile> boardDict, IEnumerable<Instruction> instructions) Read(string fileName)
     {
-        var lines = ReadInput("Example.txt").ToList();
+        var lines = ReadInput(fileName).ToList();
 
         var boardDict = new Dictionary<(int x, int y), Tile>();
         
@@ -19,7 +19,7 @@ public class BoardReader
                 var tileState = lines[row][column];
 
                 if (tileState is '.' or '#')                
-                    boardDict[(x, y)] = new Tile(x, y, tileState is '.', null, null, null, null);
+                    boardDict[(x, y)] = new Tile(x, y, tileState is '.');
             }            
         }
 
@@ -50,14 +50,42 @@ public class BoardReader
 
     void ConnectRow(Dictionary<(int x, int y), Tile> boardDict, int row)
     {
-        // ###################
-        
+        var sortedRowKeys = boardDict.Keys.Where(k => k.y == row).OrderBy(k => k.x).ToList();
+
+        for (var i = 0; i < sortedRowKeys.Count - 1; i++)
+        {
+            var tile1 = boardDict[sortedRowKeys[i]];
+            var tile2 = boardDict[sortedRowKeys[i+1]];
+
+            tile1.Right = tile2;
+            tile2.Left = tile1;
+        }
+
+        var lastTile = boardDict[sortedRowKeys.Last()];
+        var firstTile = boardDict[sortedRowKeys.First()];
+
+        lastTile.Right = firstTile;
+        firstTile.Left = lastTile;        
     }
 
     void ConnectColumn(Dictionary<(int x, int y), Tile> boardDict, int column)
     {
-        // #############################
-        
+        var sortedColumnKeys = boardDict.Keys.Where(k => k.x == column).OrderBy(k => k.y).ToList();
+
+        for (var i = 0; i < sortedColumnKeys.Count - 1; i++)
+        {
+            var tile1 = boardDict[sortedColumnKeys[i]];
+            var tile2 = boardDict[sortedColumnKeys[i+1]];
+
+            tile1.Down = tile2;
+            tile2.Up = tile1;
+        }
+
+        var lastTile = boardDict[sortedColumnKeys.Last()];
+        var firstTile = boardDict[sortedColumnKeys.First()];
+
+        lastTile.Down = firstTile;
+        firstTile.Up = lastTile;        
     }
 
     IEnumerable<Instruction> ParseInstructions(string line)
