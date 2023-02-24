@@ -20,13 +20,13 @@ class Program
 
 public class Navigator
 {
-    Tile curr;
-    Facing facing;
+    Position position;
+    // Tile curr;
+    // Facing facing;
 
     public Navigator(Tile startTile, Facing facing)
     {
-        curr = startTile;
-        this.facing = facing;
+        position = new(startTile, facing);
     }
 
     public void FollowInstructions(IEnumerable<Instruction> instructions)
@@ -43,17 +43,17 @@ public class Navigator
 
                 while (count < instruction.Steps.Value && nextTile.IsOpen)
                 {
-                    curr = nextTile;
+                    position = position with { Tile = nextTile };
                     nextTile = StepTile;
                     count++;
                 }
 
-                Console.WriteLine($" {n}) Moved {count} steps {facing}");
+                Console.WriteLine($" {n}) Moved {count} steps {position.Facing}");
             }
             else if (instruction.TurnRight.HasValue)
             {
-                facing = NextFacing(instruction.TurnRight.Value);
-                Console.WriteLine($" {n}) Rotated to {facing}");
+                position = position with { Facing = NextFacing(instruction.TurnRight.Value) };
+                Console.WriteLine($" {n}) Rotated to {position.Facing}");
             }
             else
                 throw new Exception($"Unreadable instruction!");
@@ -61,6 +61,8 @@ public class Navigator
             n++;
         }
 
+        var curr = position.Tile;
+        var facing = position.Facing;
         Console.WriteLine($"Arrived at column {curr?.X}, row {curr?.Y}, facing {facing} ({(int)facing})!");
         var score = 1000 * curr.Y + 4 * curr.X + (int)facing;
         Console.WriteLine($"Score = {score}");
@@ -70,19 +72,20 @@ public class Navigator
     {
         get
         {
+            var facing = position.Facing;
             return facing switch
             {
-                Facing.Up => curr.Up,
-                Facing.Right => curr.Right,
-                Facing.Down => curr.Down,
-                _ => curr.Left
+                Facing.Up => position.Tile.Up,
+                Facing.Right => position.Tile.Right,
+                Facing.Down => position.Tile.Down,
+                _ => position.Tile.Left
             };
         }
     }
 
     Facing NextFacing(bool TurnRight)
     {
-        return facing switch
+        return position.Facing switch
         {
             Facing.Up => TurnRight ? Facing.Right : Facing.Left,
             Facing.Right => TurnRight ? Facing.Down : Facing.Up,
@@ -116,3 +119,5 @@ public enum Facing
     Left = 2,
     Up = 3
 }
+
+public record Position(Tile Tile, Facing Facing);
