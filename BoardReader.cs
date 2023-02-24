@@ -10,17 +10,17 @@ public class BoardReader
         var lines = ReadInput(fileName).ToList();
 
         var boardDict = new Dictionary<(int x, int y), Tile>();
-        
-        for (var row = 0; row < lines.Count; row++) 
+
+        for (var row = 0; row < lines.Count; row++)
         {
             for (var column = 0; column < lines[row].Length; column++)
             {
                 var (x, y) = (column + 1, row + 1);
                 var tileState = lines[row][column];
 
-                if (tileState is '.' or '#')                
+                if (tileState is '.' or '#')
                     boardDict[(x, y)] = new Tile(x, y, tileState is '.');
-            }            
+            }
         }
 
         var minRow = boardDict.Keys.MinBy(k => k.y);
@@ -30,7 +30,7 @@ public class BoardReader
         Console.WriteLine(lines.Last());
 
         ConnectBoard(boardDict);
-        
+
         return (boardDict, ParseInstructions(lines.Last()));
     }
 
@@ -45,7 +45,7 @@ public class BoardReader
         // Vertical
         var (minCol, maxCol) = (boardDict.Keys.MinBy(k => k.x), boardDict.Keys.MaxBy(k => k.x));
         for (var col = minCol.x; col <= maxCol.x; col++)
-            ConnectColumn(boardDict, col);        
+            ConnectColumn(boardDict, col);
     }
 
     void ConnectRow(Dictionary<(int x, int y), Tile> boardDict, int row)
@@ -55,7 +55,7 @@ public class BoardReader
         for (var i = 0; i < sortedRowKeys.Count - 1; i++)
         {
             var tile1 = boardDict[sortedRowKeys[i]];
-            var tile2 = boardDict[sortedRowKeys[i+1]];
+            var tile2 = boardDict[sortedRowKeys[i + 1]];
 
             tile1.Right = tile2;
             tile2.Left = tile1;
@@ -65,7 +65,7 @@ public class BoardReader
         var firstTile = boardDict[sortedRowKeys.First()];
 
         lastTile.Right = firstTile;
-        firstTile.Left = lastTile;        
+        firstTile.Left = lastTile;
     }
 
     void ConnectColumn(Dictionary<(int x, int y), Tile> boardDict, int column)
@@ -75,7 +75,7 @@ public class BoardReader
         for (var i = 0; i < sortedColumnKeys.Count - 1; i++)
         {
             var tile1 = boardDict[sortedColumnKeys[i]];
-            var tile2 = boardDict[sortedColumnKeys[i+1]];
+            var tile2 = boardDict[sortedColumnKeys[i + 1]];
 
             tile1.Down = tile2;
             tile2.Up = tile1;
@@ -85,7 +85,7 @@ public class BoardReader
         var firstTile = boardDict[sortedColumnKeys.First()];
 
         lastTile.Down = firstTile;
-        firstTile.Up = lastTile;        
+        firstTile.Up = lastTile;
     }
 
     IEnumerable<Instruction> ParseInstructions(string line)
@@ -107,8 +107,8 @@ public class BoardReader
                 var numText = string.Concat(fromIndex.TakeWhile(IsNum));
                 i += numText.Length;
                 yield return new Instruction(Steps: int.Parse(numText), TurnRight: null);
-            }           
-        }        
+            }
+        }
     }
 
     static IEnumerable<string> ReadInput(string file) =>

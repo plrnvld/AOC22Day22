@@ -1,20 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-
 
 class Program
 {
     public static void Main(string[] args)
     {
         var boardReader = new BoardReader();
-        var (boardDict, instructions) = boardReader.Read("Example.txt");
-
-        foreach (var instruction in instructions)
-            Console.WriteLine(instruction);
+        var (boardDict, instructions) = boardReader.Read("Input.txt");
 
         var start = boardDict[boardDict.Keys.Where(k => k.y == 1).MinBy(k => k.x)];
+        Console.WriteLine($"Starting at {start}");
+
         var navigator = new Navigator(start, Facing.Right);
 
         navigator.FollowInstructions(instructions);
@@ -25,7 +22,7 @@ public class Navigator
 {
     Tile curr;
     Facing facing;
-    
+
     public Navigator(Tile startTile, Facing facing)
     {
         curr = startTile;
@@ -41,10 +38,13 @@ public class Navigator
             {
                 var count = 0;
                 var nextTile = StepTile;
-                
+
+                // Console.WriteLine($"    - Next tile {nextTile}");
+
                 while (count < instruction.Steps.Value && nextTile.IsOpen)
                 {
                     curr = nextTile;
+                    nextTile = StepTile;
                     count++;
                 }
 
@@ -56,20 +56,21 @@ public class Navigator
                 Console.WriteLine($" {n}) Rotated to {facing}");
             }
             else
-                throw new Exception($"Unreadable instruction!");     
+                throw new Exception($"Unreadable instruction!");
 
             n++;
         }
 
-        Console.WriteLine($"Arrived at {curr?.X},{curr?.Y}, facing {facing}!");
-        
+        Console.WriteLine($"Arrived at column {curr?.X}, row {curr?.Y}, facing {facing} ({(int)facing})!");
+        var score = 1000 * curr.Y + 4 * curr.X + (int)facing;
+        Console.WriteLine($"Score = {score}");
     }
 
     Tile StepTile
     {
-        get 
+        get
         {
-            return facing switch 
+            return facing switch
             {
                 Facing.Up => curr.Up,
                 Facing.Right => curr.Right,
@@ -81,7 +82,7 @@ public class Navigator
 
     Facing NextFacing(bool TurnRight)
     {
-        return facing switch 
+        return facing switch
         {
             Facing.Up => TurnRight ? Facing.Right : Facing.Left,
             Facing.Right => TurnRight ? Facing.Down : Facing.Up,
@@ -99,14 +100,19 @@ public record Tile(int X, int Y, bool IsOpen)
     public Tile Right { get; set; }
     public Tile Up { get; set; }
     public Tile Down { get; set; }
+
+    public override string ToString()
+    {
+        return $"Tile ({X},{Y}) open={IsOpen}";
+    }
 }
 
 public record Instruction(int? Steps, bool? TurnRight);
 
 public enum Facing
 {
-    Up,
-    Down,
-    Left,
-    Right    
+    Right = 0,
+    Down = 1,
+    Left = 2,
+    Up = 3
 }
