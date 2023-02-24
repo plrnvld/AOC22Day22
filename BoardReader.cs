@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+#nullable enable
+
 public class BoardReader
 {
-    public (Dictionary<(int x, int y), Tile> boardDict, IEnumerable<Instruction> instructions) Read(string fileName)
+    Tile WarpTile = new Tile(-1, -1, IsOpen: false, IsWarp: true);
+    
+    public (Dictionary<(int x, int y), Tile> boardDict, IEnumerable<Instruction> instructions, int blockSize) Read(string fileName)
     {
         var lines = ReadInput(fileName).ToList();
 
@@ -19,22 +23,24 @@ public class BoardReader
                 var tileState = lines[row][column];
 
                 if (tileState is '.' or '#')
-                    boardDict[(x, y)] = new Tile(x, y, tileState is '.');
+                    boardDict[(x, y)] = new Tile(x, y, tileState is '.', IsWarp: false);
             }
         }
 
         var minRow = boardDict.Keys.MinBy(k => k.y);
         var maxRow = boardDict.Keys.MaxBy(k => k.y);
 
+        var blockSize = maxRow.y / 3;
+                
         Console.WriteLine(boardDict.Keys.Count());
         Console.WriteLine(lines.Last());
 
-        ConnectBoard(boardDict);
+        ConnectBoard(boardDict, blockSize);
 
-        return (boardDict, ParseInstructions(lines.Last()));
+        return (boardDict, ParseInstructions(lines.Last()), blockSize);
     }
 
-    void ConnectBoard(Dictionary<(int x, int y), Tile> boardDict)
+    void ConnectBoard(Dictionary<(int x, int y), Tile> boardDict, int blockSize)
     {
         // Horizontal
         var (minRow, maxRow) = (boardDict.Keys.MinBy(k => k.y), boardDict.Keys.MaxBy(k => k.y));
@@ -64,8 +70,8 @@ public class BoardReader
         var lastTile = boardDict[sortedRowKeys.Last()];
         var firstTile = boardDict[sortedRowKeys.First()];
 
-        lastTile.Right = firstTile;
-        firstTile.Left = lastTile;
+        lastTile.Right = WarpTile;
+        firstTile.Left = WarpTile;
     }
 
     void ConnectColumn(Dictionary<(int x, int y), Tile> boardDict, int column)
@@ -84,8 +90,8 @@ public class BoardReader
         var lastTile = boardDict[sortedColumnKeys.Last()];
         var firstTile = boardDict[sortedColumnKeys.First()];
 
-        lastTile.Down = firstTile;
-        firstTile.Up = lastTile;
+        lastTile.Down = WarpTile;
+        firstTile.Up = WarpTile;
     }
 
     IEnumerable<Instruction> ParseInstructions(string line)

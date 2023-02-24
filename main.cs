@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 class Program
 {
     public static void Main(string[] args)
     {
         var boardReader = new BoardReader();
-        var (boardDict, instructions) = boardReader.Read("Input.txt");
+        var (boardDict, instructions, blockSize) = boardReader.Read("Example.txt");
 
         var start = boardDict[boardDict.Keys.Where(k => k.y == 1).MinBy(k => k.x)];
         Console.WriteLine($"Starting at {start}");
 
-        var navigator = new Navigator(start, Facing.Right);
+        var navigator = new Navigator(start, Facing.Right, blockSize, boardDict);
 
         navigator.FollowInstructions(instructions);
     }
@@ -20,13 +22,16 @@ class Program
 
 public class Navigator
 {
-    Position position;
-    // Tile curr;
-    // Facing facing;
-
-    public Navigator(Tile startTile, Facing facing)
+    Dictionary<(int x, int y), Tile> boardDict;
+    Position Position { get; set; }
+    int blockSize;
+    
+    public Navigator(Tile startTile, Facing facing, int blockSize, Dictionary<(int x, int y), Tile> boardDict)
     {
-        position = new(startTile, facing);
+        Position = new(startTile, facing);
+
+        this.blockSize = blockSize;
+        this.boardDict = boardDict;
     }
 
     public void FollowInstructions(IEnumerable<Instruction> instructions)
@@ -41,19 +46,46 @@ public class Navigator
 
                 // Console.WriteLine($"    - Next tile {nextTile}");
 
-                while (count < instruction.Steps.Value && nextTile.IsOpen)
+                Position? warpPosition;
+                
+                warpPosition = nextTile!.IsWarp ? ResolveWarpPosition(Position) : null;
+
+                if (warpPosition is not null)
                 {
-                    position = position with { Tile = nextTile };
+                    var blockOld = BlockNum(Position.Tile.X, Position.Tile.Y);
+                    var blockNew = BlockNum(warpPosition.Tile.X, warpPosition.Tile.Y);
+                    Console.WriteLine($"⚡⚡ Warping from {Position} ({blockOld}) to {warpPosition} ({blockNew})?");
+                    
+                    nextTile = warpPosition.Tile;
+                    // ############### Handle changed facing
+                }
+
+                while (count < instruction.Steps.Value && nextTile!.IsOpen)
+                {                   
+                    Position = Position with { Tile = nextTile };
                     nextTile = StepTile;
+
+                    warpPosition = nextTile!.IsWarp ? ResolveWarpPosition(Position) : null;
+
+                    if (warpPosition is not null)
+                    {
+                        var blockOld = BlockNum(Position.Tile.X, Position.Tile.Y);
+                        var blockNew = BlockNum(warpPosition.Tile.X, warpPosition.Tile.Y);
+                        Console.WriteLine($"⚡⚡ Warping from {Position} ({blockOld}) to {warpPosition} ({blockNew})?");
+                        
+                        nextTile = warpPosition.Tile;
+                        // ############### Handle changed facing
+                    }
+                
                     count++;
                 }
 
-                Console.WriteLine($" {n}) Moved {count} steps {position.Facing}");
+                Console.WriteLine($" {n}) Moved {count} steps {Position.Facing}");
             }
             else if (instruction.TurnRight.HasValue)
             {
-                position = position with { Facing = NextFacing(instruction.TurnRight.Value) };
-                Console.WriteLine($" {n}) Rotated to {position.Facing}");
+                Position = Position with { Facing = NextFacing(instruction.TurnRight.Value) };
+                Console.WriteLine($" {n}) Rotated to {Position.Facing}");
             }
             else
                 throw new Exception($"Unreadable instruction!");
@@ -61,31 +93,93 @@ public class Navigator
             n++;
         }
 
-        var curr = position.Tile;
-        var facing = position.Facing;
+        var curr = Position.Tile;
+        var facing = Position.Facing;
         Console.WriteLine($"Arrived at column {curr?.X}, row {curr?.Y}, facing {facing} ({(int)facing})!");
-        var score = 1000 * curr.Y + 4 * curr.X + (int)facing;
+        var score = 1000 * curr?.Y + 4 * curr?.X + (int)facing;
         Console.WriteLine($"Score = {score}");
     }
 
-    Tile StepTile
+    Position ResolveWarpPosition(Position curr)
+    {
+        var facing = curr.Facing;
+        var col = curr.Tile.X;
+        var row = curr.Tile.Y;        
+        var blockNum = BlockNum(curr.Tile.X, curr.Tile.Y);
+
+        var newCol = -1;
+        var newRow = -1;
+
+        if (facing is Facing.Right)
+        {
+            newCol = blockNum switch
+            {
+                1 => blockSize * 2 + 1,
+                4 => blockSize * 0 + 1,
+                6 => blockSize * 2 + 1
+            };
+
+            newRow = row;
+        }
+        else if (facing is Facing.Left)
+        {
+            newCol = blockNum switch
+            {
+                1 => blockSize * 3,
+                2 => blockSize * 3,
+                5 => blockSize * 4
+            };
+
+            newRow = row;
+        }
+        else if (facing is Facing.Up)
+        {
+            newRow = blockNum switch
+            {
+                1 => blockSize * 3,
+                2 => blockSize * 2,
+                3 => blockSize * 2,
+                6 => blockSize * 3
+            };
+
+            newCol = col;
+        }
+        else // Facing.Down
+        {
+            newRow = blockNum switch
+            {
+                2 => blockSize * 1 + 1, 
+                3 => blockSize * 1 + 1,
+                5 => blockSize * 0 + 1,
+                6 => blockSize * 2 + 1
+            };
+
+            newCol = col;
+        }
+
+        var nextTile = boardDict[(newCol, newRow)];
+        return new Position(nextTile, facing);
+    }
+
+    Tile? StepTile
     {
         get
         {
-            var facing = position.Facing;
+            var facing = Position.Facing;
+            
             return facing switch
             {
-                Facing.Up => position.Tile.Up,
-                Facing.Right => position.Tile.Right,
-                Facing.Down => position.Tile.Down,
-                _ => position.Tile.Left
+                Facing.Up => Position.Tile.Up,
+                Facing.Right => Position.Tile.Right,
+                Facing.Down => Position.Tile.Down,
+                _ => Position.Tile.Left
             };
         }
     }
 
     Facing NextFacing(bool TurnRight)
     {
-        return position.Facing switch
+        return Position.Facing switch
         {
             Facing.Up => TurnRight ? Facing.Right : Facing.Left,
             Facing.Right => TurnRight ? Facing.Down : Facing.Up,
@@ -93,19 +187,39 @@ public class Navigator
             _ => TurnRight ? Facing.Up : Facing.Down
         };
     }
+
+    public int BlockNum(int x, int y)
+    {
+        var row = y;
+        var col = x;
+        var rowBlock = Math.Ceiling(((double)row) / blockSize);
+        var colBlock = Math.Ceiling(((double)col) / blockSize);
+
+        return (rowBlock, colBlock) switch
+        {
+            (1, 3) => 1,
+            (2, 1) => 2,
+            (2, 2) => 3,
+            (2, 3) => 4,
+            (3, 3) => 5,
+            (3, 4) => 6,
+            _ => throw new Exception($"No match with ({rowBlock},{colBlock}), Input x={x} and y={y} and blockSize={blockSize}")          
+        };
+    }    
 }
 
-
-
-public record Tile(int X, int Y, bool IsOpen)
+public record Tile(int X, int Y, bool IsOpen, bool IsWarp)
 {
-    public Tile Left { get; set; }
-    public Tile Right { get; set; }
-    public Tile Up { get; set; }
-    public Tile Down { get; set; }
+    public Tile? Left { get; set; }
+    public Tile? Right { get; set; }
+    public Tile? Up { get; set; }
+    public Tile? Down { get; set; }
 
     public override string ToString()
     {
+        if (IsWarp)
+            return $"⚡WARP⚡TILE⚡";
+        
         return $"Tile ({X},{Y}) open={IsOpen}";
     }
 }
