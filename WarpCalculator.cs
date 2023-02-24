@@ -47,25 +47,25 @@ public class WarpCalculator
     {
         return new Dictionary<BlockPos, BlockSide>
         {
-            /*
-            [new BlockPos(3, 1, Facing.Right)] = new BlockSide(3, 1, Side.Left),
-            [new BlockPos(3, 2, Facing.Right)] = new BlockSide(1, 2, Side.Left),
-            [new BlockPos(4, 3, Facing.Right)] = new BlockSide(3, 3, Side.Left),
+            // ########## Change here
+            
+            [new BlockPos(3, 1, Facing.Right)] = new BlockSide(2, 3, Side.Right),
+            [new BlockPos(2, 2, Facing.Right)] = new BlockSide(3, 1, Side.Down),
+            [new BlockPos(2, 3, Facing.Right)] = new BlockSide(3, 1, Side.Right),
+            [new BlockPos(1, 4, Facing.Right)] = new BlockSide(2, 3, Side.Down),
 
-            [new BlockPos(3, 1, Facing.Left)] = new BlockSide(3, 1, Side.Right),
-            [new BlockPos(1, 2, Facing.Left)] = new BlockSide(3, 2, Side.Right),
-            [new BlockPos(3, 3, Facing.Left)] = new BlockSide(4, 3, Side.Right),
+            [new BlockPos(2, 1, Facing.Left)] = new BlockSide(1, 3, Side.Left),
+            [new BlockPos(2, 2, Facing.Left)] = new BlockSide(1, 3, Side.Up),
+            [new BlockPos(1, 3, Facing.Left)] = new BlockSide(2, 1, Side.Left),
+            [new BlockPos(1, 4, Facing.Left)] = new BlockSide(2, 1, Side.Up),
 
-            [new BlockPos(1, 2, Facing.Down)] = new BlockSide(1, 2, Side.Up),
-            [new BlockPos(2, 2, Facing.Down)] = new BlockSide(2, 2, Side.Up),
-            [new BlockPos(3, 3, Facing.Down)] = new BlockSide(3, 1, Side.Up),
-            [new BlockPos(4, 3, Facing.Down)] = new BlockSide(4, 3, Side.Up),
-
-            [new BlockPos(1, 2, Facing.Up)] = new BlockSide(1, 2, Side.Down),
-            [new BlockPos(2, 2, Facing.Up)] = new BlockSide(2, 2, Side.Down),
-            [new BlockPos(3, 1, Facing.Up)] = new BlockSide(3, 3, Side.Down),
-            [new BlockPos(4, 3, Facing.Up)] = new BlockSide(4, 3, Side.Down),
-            */
+            [new BlockPos(1, 4, Facing.Down)] = new BlockSide(3, 1, Side.Up),
+            [new BlockPos(2, 3, Facing.Down)] = new BlockSide(1, 4, Side.Right),
+            [new BlockPos(3, 1, Facing.Down)] = new BlockSide(2, 2, Side.Right),
+            
+            [new BlockPos(1, 3, Facing.Up)] = new BlockSide(2, 2, Side.Left),
+            [new BlockPos(2, 1, Facing.Up)] = new BlockSide(1, 4, Side.Left),
+            [new BlockPos(3, 1, Facing.Up)] = new BlockSide(1, 4, Side.Down),
         };
     }
 
