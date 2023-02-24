@@ -51,8 +51,6 @@ public class WarpCalculator
         
         return new Dictionary<BlockPos, BlockSide>
         {
-            // ########## Change here
-            
             [new BlockPos(3, 1, Facing.Right)] = new BlockSide(2, 3, Side.Right),
             [new BlockPos(2, 2, Facing.Right)] = new BlockSide(3, 1, Side.Down),
             [new BlockPos(2, 3, Facing.Right)] = new BlockSide(3, 1, Side.Right),
@@ -75,8 +73,6 @@ public class WarpCalculator
 
     public Position GetWarpTarget(Position curr)
     {
-        Console.WriteLine($"---> Calculating warp target from {curr}");
-        
         var xBlock = (int)Math.Ceiling(((double)curr.Tile.X) / blockSize);
         var yBlock = (int)Math.Ceiling(((double)curr.Tile.Y) / blockSize);
         var blockCol = RelPos(curr.Tile.X);
@@ -84,19 +80,15 @@ public class WarpCalculator
         var blockColInv = blockSize + 1 - blockCol;
         var blockRowInv = blockSize + 1 - blockRow;
 
-        Console.WriteLine($"---> block x={xBlock}, block y={yBlock}");
         var targetBlockSide = warpTranslator[new BlockPos(xBlock, yBlock, curr.Facing)];
 
         var addX = (targetBlockSide.XBlock - 1) * blockSize;
         var addY = (targetBlockSide.YBlock - 1) * blockSize;
-        
 
         var newFacing = FromSide(targetBlockSide.Side);
 
         var newCol = -1;
         var newRow = -1;
-
-        Console.WriteLine($"---> Aiming at side {targetBlockSide.Side}");
 
         switch (targetBlockSide.Side)
         {
@@ -152,16 +144,8 @@ public class WarpCalculator
         return new Position(newTile, newFacing);
     }
 
-    int RelPos(int pos)
-    {
-        var result = pos;
-
-        while (result > blockSize)
-            result -= blockSize;
-
-        return result;        
-    }
-
+    int RelPos(int pos) => (pos - 1) % blockSize + 1;
+    
     Facing FromSide(Side side)
     {
         return side switch
@@ -171,25 +155,6 @@ public class WarpCalculator
             Side.Up => Facing.Down,
             Side.Down => Facing.Up,
             _ => throw new Exception("No side matches")
-        };
-    }
-
-    public int BlockNum(int x, int y)
-    {
-        var row = y;
-        var col = x;
-        var rowBlock = Math.Ceiling(((double)row) / blockSize);
-        var colBlock = Math.Ceiling(((double)col) / blockSize);
-
-        return (rowBlock, colBlock) switch
-        {
-            (1, 3) => 1,
-            (2, 1) => 2,
-            (2, 2) => 3,
-            (2, 3) => 4,
-            (3, 3) => 5,
-            (3, 4) => 6,
-            _ => throw new Exception($"No match with ({rowBlock},{colBlock}), Input x={x} and y={y} and blockSize={blockSize}")
         };
     }
 }

@@ -51,18 +51,17 @@ public class Navigator
                 while (count < instruction.Steps.Value && nextTile!.IsOpen)
                 {                   
                     Position = Position with { Tile = nextTile, Facing = warpPosition?.Facing ?? Position.Facing };                    
-
                     HandleStep();
                 
                     count++;
                 }
 
-                Console.WriteLine($" {n}) Moved {count} steps {Position.Facing}");
+                // Console.WriteLine($" {n}) Moved {count} steps {Position.Facing}");
             }
             else if (instruction.TurnRight.HasValue)
             {
                 Position = Position with { Facing = NextFacing(instruction.TurnRight.Value) };
-                Console.WriteLine($" {n}) Rotated to {Position.Facing}");
+                // Console.WriteLine($" {n}) Rotated to {Position.Facing}");
             }
             else
                 throw new Exception($"Unreadable instruction!");

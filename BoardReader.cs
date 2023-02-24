@@ -12,7 +12,6 @@ public class BoardReader
     public (Dictionary<(int x, int y), Tile> boardDict, IEnumerable<Instruction> instructions, int blockSize) Read(string fileName)
     {
         var lines = ReadInput(fileName).ToList();
-
         var boardDict = new Dictionary<(int x, int y), Tile>();
 
         for (var row = 0; row < lines.Count; row++)
@@ -32,9 +31,6 @@ public class BoardReader
 
         var blockSize = fileName == "Input.txt" ? 50 : 4;
                 
-        // Console.WriteLine(boardDict.Keys.Count());
-        // Console.WriteLine(lines.Last());
-
         ConnectBoard(boardDict, blockSize);
 
         return (boardDict, ParseInstructions(lines.Last()), blockSize);
@@ -42,13 +38,11 @@ public class BoardReader
 
     void ConnectBoard(Dictionary<(int x, int y), Tile> boardDict, int blockSize)
     {
-        // Horizontal
         var (minRow, maxRow) = (boardDict.Keys.MinBy(k => k.y), boardDict.Keys.MaxBy(k => k.y));
 
         for (var row = minRow.y; row <= maxRow.y; row++)
             ConnectRow(boardDict, row);
 
-        // Vertical
         var (minCol, maxCol) = (boardDict.Keys.MinBy(k => k.x), boardDict.Keys.MaxBy(k => k.x));
         for (var col = minCol.x; col <= maxCol.x; col++)
             ConnectColumn(boardDict, col);
