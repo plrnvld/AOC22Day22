@@ -95,6 +95,9 @@ public class Navigator
 
     Position ResolveWarpPosition(Position curr)
     {
+        int BlockStart(int block) => blockSize * (block - 1) + 1;
+        int BlockEnd(int block) => blockSize * block;
+        
         var facing = curr.Facing;
         var col = curr.Tile.X;
         var row = curr.Tile.Y;        
@@ -107,9 +110,9 @@ public class Navigator
         {
             newCol = blockNum switch
             {
-                1 => blockSize * 2 + 1,
-                4 => blockSize * 0 + 1,
-                6 => blockSize * 2 + 1,
+                1 => BlockStart(3),
+                4 => BlockStart(1),
+                6 => BlockStart(3),
                 _ => throw new Exception("not supported")
             };
 
@@ -119,9 +122,9 @@ public class Navigator
         {
             newCol = blockNum switch
             {
-                1 => blockSize * 3,
-                2 => blockSize * 3,
-                5 => blockSize * 4,
+                1 => BlockEnd(3),
+                2 => BlockEnd(3),
+                5 => BlockEnd(4),
                 _ => throw new Exception("not supported")
             };
 
@@ -131,10 +134,10 @@ public class Navigator
         {
             newRow = blockNum switch
             {
-                1 => blockSize * 3,
-                2 => blockSize * 2,
-                3 => blockSize * 2,
-                6 => blockSize * 3,
+                1 => BlockEnd(3),
+                2 => BlockEnd(2),
+                3 => BlockEnd(2),
+                6 => BlockEnd(3),
                 _ => throw new Exception("not supported")
             };
 
@@ -144,10 +147,10 @@ public class Navigator
         {
             newRow = blockNum switch
             {
-                2 => blockSize * 1 + 1, 
-                3 => blockSize * 1 + 1,
-                5 => blockSize * 0 + 1,
-                6 => blockSize * 2 + 1,
+                2 => BlockStart(2), 
+                3 => BlockStart(2),
+                5 => BlockStart(1),
+                6 => BlockStart(3),
                 _ => throw new Exception("not supported")
             };
 
