@@ -30,7 +30,7 @@ public class BoardReader
         var minRow = boardDict.Keys.MinBy(k => k.y);
         var maxRow = boardDict.Keys.MaxBy(k => k.y);
 
-        var blockSize = maxRow.y / 3;
+        var blockSize = fileName == "Input.txt" ? 50 : 4;
                 
         Console.WriteLine(boardDict.Keys.Count());
         Console.WriteLine(lines.Last());

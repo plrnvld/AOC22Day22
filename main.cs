@@ -42,31 +42,15 @@ public class Navigator
             if (instruction.Steps.HasValue)
             {
                 var count = 0;
-                var nextTile = StepTile;
-
-                // Console.WriteLine($"    - Next tile {nextTile}");
-
+                Tile? nextTile = null;
                 Position? warpPosition;
                 
-                warpPosition = nextTile!.IsWarp ? ResolveWarpPosition(Position) : null;
-
-                if (warpPosition is not null)
+                void HandleStep()
                 {
-                    var blockOld = BlockNum(Position.Tile.X, Position.Tile.Y);
-                    var blockNew = BlockNum(warpPosition.Tile.X, warpPosition.Tile.Y);
-                    Console.WriteLine($"⚡⚡ Warping from {Position} ({blockOld}) to {warpPosition} ({blockNew})?");
-                    
-                    nextTile = warpPosition.Tile;
-                    // ############### Handle changed facing
-                }
-
-                while (count < instruction.Steps.Value && nextTile!.IsOpen)
-                {                   
-                    Position = Position with { Tile = nextTile };
                     nextTile = StepTile;
-
+                    
                     warpPosition = nextTile!.IsWarp ? ResolveWarpPosition(Position) : null;
-
+                    
                     if (warpPosition is not null)
                     {
                         var blockOld = BlockNum(Position.Tile.X, Position.Tile.Y);
@@ -76,6 +60,15 @@ public class Navigator
                         nextTile = warpPosition.Tile;
                         // ############### Handle changed facing
                     }
+                }
+
+                HandleStep();
+
+                while (count < instruction.Steps.Value && nextTile!.IsOpen)
+                {                   
+                    Position = Position with { Tile = nextTile, Facing = warpPosition?.Facing ?? Position.Facing };                    
+
+                    HandleStep();
                 
                     count++;
                 }
@@ -116,7 +109,8 @@ public class Navigator
             {
                 1 => blockSize * 2 + 1,
                 4 => blockSize * 0 + 1,
-                6 => blockSize * 2 + 1
+                6 => blockSize * 2 + 1,
+                _ => throw new Exception("not supported")
             };
 
             newRow = row;
@@ -127,7 +121,8 @@ public class Navigator
             {
                 1 => blockSize * 3,
                 2 => blockSize * 3,
-                5 => blockSize * 4
+                5 => blockSize * 4,
+                _ => throw new Exception("not supported")
             };
 
             newRow = row;
@@ -139,7 +134,8 @@ public class Navigator
                 1 => blockSize * 3,
                 2 => blockSize * 2,
                 3 => blockSize * 2,
-                6 => blockSize * 3
+                6 => blockSize * 3,
+                _ => throw new Exception("not supported")
             };
 
             newCol = col;
@@ -151,7 +147,8 @@ public class Navigator
                 2 => blockSize * 1 + 1, 
                 3 => blockSize * 1 + 1,
                 5 => blockSize * 0 + 1,
-                6 => blockSize * 2 + 1
+                6 => blockSize * 2 + 1,
+                _ => throw new Exception("not supported")
             };
 
             newCol = col;
