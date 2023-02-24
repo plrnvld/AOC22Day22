@@ -9,7 +9,7 @@ class Program
     public static void Main(string[] args)
     {
         var boardReader = new BoardReader();
-        var (boardDict, instructions, blockSize) = boardReader.Read("Example.txt");
+        var (boardDict, instructions, blockSize) = boardReader.Read("Input.txt");
 
         var start = boardDict[boardDict.Keys.Where(k => k.y == 1).MinBy(k => k.x)];
         Console.WriteLine($"Starting at {start}");

@@ -32,8 +32,8 @@ public class BoardReader
 
         var blockSize = fileName == "Input.txt" ? 50 : 4;
                 
-        Console.WriteLine(boardDict.Keys.Count());
-        Console.WriteLine(lines.Last());
+        // Console.WriteLine(boardDict.Keys.Count());
+        // Console.WriteLine(lines.Last());
 
         ConnectBoard(boardDict, blockSize);
 

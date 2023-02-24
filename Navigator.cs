@@ -22,9 +22,7 @@ public class Navigator
     }
 
     public void FollowInstructions(IEnumerable<Instruction> instructions)
-    {
-
-        
+    {       
         var n = 1;
         foreach (var instruction in instructions)
         {
@@ -42,9 +40,7 @@ public class Navigator
                     
                     if (warpPosition is not null)
                     {
-                        var blockOld = BlockNum(Position.Tile.X, Position.Tile.Y);
-                        var blockNew = BlockNum(warpPosition.Tile.X, warpPosition.Tile.Y);
-                        Console.WriteLine($"⚡⚡ Warping from {Position} ({blockOld}) to {warpPosition} ({blockNew})?");
+                        Console.WriteLine($"⚡⚡ Warping from {Position} to {warpPosition}?");
                         
                         nextTile = warpPosition.Tile;
                     }
@@ -107,23 +103,4 @@ public class Navigator
             _ => TurnRight ? Facing.Up : Facing.Down
         };
     }
-
-    public int BlockNum(int x, int y)
-    {
-        var row = y;
-        var col = x;
-        var rowBlock = Math.Ceiling(((double)row) / blockSize);
-        var colBlock = Math.Ceiling(((double)col) / blockSize);
-
-        return (rowBlock, colBlock) switch
-        {
-            (1, 3) => 1,
-            (2, 1) => 2,
-            (2, 2) => 3,
-            (2, 3) => 4,
-            (3, 3) => 5,
-            (3, 4) => 6,
-            _ => throw new Exception($"No match with ({rowBlock},{colBlock}), Input x={x} and y={y} and blockSize={blockSize}")          
-        };
-    }    
 }

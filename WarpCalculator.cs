@@ -21,6 +21,8 @@ public class WarpCalculator
 
     Dictionary<BlockPos, BlockSide> InitExampleWarpTranslator()
     {
+        Console.WriteLine(">> Using Example config");
+        
         return new Dictionary<BlockPos, BlockSide>
         {
             [new BlockPos(3, 1, Facing.Right)] = new BlockSide(3, 1, Side.Left),
@@ -45,6 +47,8 @@ public class WarpCalculator
 
     Dictionary<BlockPos, BlockSide> InitInputWarpTranslator()
     {
+        Console.WriteLine(">> Using Input config");
+        
         return new Dictionary<BlockPos, BlockSide>
         {
             // ########## Change here
